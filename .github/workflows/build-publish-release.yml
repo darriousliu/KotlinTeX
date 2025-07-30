@@ -101,4 +101,3 @@ jobs:
           ./gradlew publish \
             -PGitHubPackagesUsername=$GITHUB_USERNAME \
             -PGitHubPackagesPassword=$GITHUB_TOKEN
-            -Pkotlin.mpp.enableCInteropCommonization=false
