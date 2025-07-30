@@ -86,7 +86,7 @@ jobs:
           echo "CC: $CC"
           echo "CXX: $CXX"
           echo "DEVELOPER_DIR: $DEVELOPER_DIR"
-          ./build-ios-cmake.sh "Xcode_${{ env.XCODE_VERSION }}" "${{ env.IOS_SDK_VERSION }}"
+          ./build-ios-cmake.sh "Release" "Xcode_${{ env.XCODE_VERSION }}" "${{ env.IOS_SDK_VERSION }}"
 
       - name: Publish to GitHub Packages And Maven Central
         env:
