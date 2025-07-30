@@ -74,7 +74,6 @@ jobs:
 
       - name: Build FreeType iOS libraries
         run: |
-          ls external/freetype
           cd external/freetype
           chmod +x build-ios-cmake.sh
           # 确保环境变量正确设置
