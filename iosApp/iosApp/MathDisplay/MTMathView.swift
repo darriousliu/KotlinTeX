@@ -78,8 +78,12 @@ struct MTMathView: View {
             return MTMathViewState(displayList: nil, calculatedWidth: 0, calculatedHeight: 0, parseError: parseError)
         }
 
-        // 1. 更新字体
-        let newFont = (font ?? MTFontManager.defaultFont()).copyFontWithSize(size: Float(fontSize))
+        // Get screen scale for proper density handling
+        let screenScale = UIScreen.main.scale
+
+        // 1. 更新字体 - Apply screen scale to font size
+        let scaledFontSize = fontSize * Float(screenScale)
+        let newFont = (font ?? MTFontManager.defaultFont()).copyFontWithSize(size: scaledFontSize)
 
         // 2. 更新显示列表
         let newDisplayList: MTMathListDisplay? = {
@@ -87,15 +91,16 @@ struct MTMathView: View {
             return MTTypesetter.createLineForMathList(mathList: mathList, font: newFont, style: style)
         }()
 
-        // 3. 计算尺寸
+        // 3. 计算尺寸 - Apply proper scaling for screen density
         let (width, height): (CGFloat, CGFloat) = {
             if let newDisplayList = newDisplayList {
-                let width = newDisplayList.width + 1
-                let height = newDisplayList.ascent + newDisplayList.descent + 1
-                return (CGFloat(width), CGFloat(height))
+                // Convert from points to screen pixels and back to points for proper sizing
+                let width = CGFloat(newDisplayList.width + 1) / screenScale
+                let height = CGFloat(newDisplayList.ascent + newDisplayList.descent + 1) / screenScale
+                return (width, height)
             } else if let parseError = parseError, parseError.errorCode != .ErrorNone, displayErrorInline {
                 let errorTextSize = CGFloat(errorFontSize)
-                let estimatedWidth = CGFloat(parseError.errorDesc.count) * CGFloat(errorTextSize * 0.6)
+                let estimatedWidth = CGFloat(parseError.errorDesc.count) * errorTextSize * 0.6
                 return (estimatedWidth, errorTextSize * 1.2)
             } else {
                 return (0, 0)
@@ -112,34 +117,49 @@ struct MTMathView: View {
     }
 
     private func drawError(_ errorMessage: String, _ errorFontSize: Float, _ errorColor: Color, _ context: GraphicsContext, _ size: CGSize) {
-
+        // Create a Text view for the error message
+        let errorText = Text(errorMessage)
+            .font(.system(size: CGFloat(errorFontSize)))
+            .foregroundColor(errorColor)
+        
+        // Calculate center position
+        let centerPoint = CGPoint(x: size.width / 2, y: size.height / 2)
+        
+        // Draw the error text centered
+        context.draw(errorText, at: centerPoint, anchor: .center)
     }
 
     private func drawMathFormula(_ displayList: MTMathListDisplay, _ textColor: Color, _ textAlignment: MTTextAlignment, _ context: GraphicsContext, _ size: CGSize) {
         var context = context
+        
+        // Get screen scale for proper coordinate calculations
+        let screenScale = UIScreen.main.scale
+        
         // 根据对齐方式计算 X 位置
         let textX: Float = {
             switch textAlignment {
             case .left: return 0
-            case .center: return Float((size.width - CGFloat(displayList.width)) / 2)
-            case .right: return Float(size.width - CGFloat(displayList.width))
+            case .center: return Float((size.width - CGFloat(displayList.width) / screenScale) / 2)
+            case .right: return Float(size.width - CGFloat(displayList.width) / screenScale)
             }
         }()
 
         // 计算 Y 位置（垂直居中）
         var eqHeight = displayList.ascent + displayList.descent
-        if eqHeight < Float(size.height) / 2 {
-            eqHeight = Float(size.height / 2)
-        }
-        let textY = (Float(size.height) - eqHeight) / 2 + displayList.descent
+        let scaledEqHeight = CGFloat(eqHeight) / screenScale
+        let adjustedEqHeight = max(scaledEqHeight, size.height / 2)
+        let textY = Float((size.height - adjustedEqHeight) / 2 + CGFloat(displayList.descent) / screenScale)
 
         // 设置位置
         displayList.position = MTCGPoint(x: textX, y: textY)
 
         // 绘制（翻转 Y 轴以匹配数学坐标系）
         context.scaleBy(x: 1, y: -1)
+        context.translateBy(x: 0, y: -size.height)
         displayList.draw(canvas: context)
-        context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.red))
+        
+        // Debug red fill removed - was masking the actual rendering
+        // context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.red))
     }
 }
 
@@ -181,7 +201,75 @@ struct MTMathView: View {
 //        .modifier(modifier)
 //        .frame(width: mathItem.width, height: mathItem.height)
 //    }
-//}
+///**
+ * Compose 版本的数学公式显示组件
+ *
+ * 支持 LaTeX 格式的数学公式渲染
+ *
+ * @param latex LaTeX 格式的数学公式字符串
+ * @param fontSize 字体大小
+ * @param textColor 文本颜色
+ * @param font 字体，默认使用 MTFontManager.defaultFont()
+ * @param mode 显示模式：Display 模式或 Text 模式
+ * @param textAlignment 文本对齐方式
+ * @param displayErrorInline 是否内联显示解析错误
+ * @param errorFontSize 错误文本的字体大小
+ */
+struct MTMathViewLatex: View {
+    let latex: String
+    let fontSize: Float
+    let textColor: Color
+    let font: MTFont?
+    let mode: MTMathViewMode
+    let textAlignment: MTTextAlignment
+    let displayErrorInline: Bool
+    let errorFontSize: Float
+    
+    @State private var mathList: MTMathList?
+    @State private var parseError: MTParseError?
+    
+    init(latex: String, fontSize: Float = DefaultFontSize, textColor: Color = .black, font: MTFont? = nil, mode: MTMathViewMode = .display, textAlignment: MTTextAlignment = .left, displayErrorInline: Bool = true, errorFontSize: Float = DefaultErrorFontSize) {
+        self.latex = latex
+        self.fontSize = fontSize
+        self.textColor = textColor
+        self.font = font
+        self.mode = mode
+        self.textAlignment = textAlignment
+        self.displayErrorInline = displayErrorInline
+        self.errorFontSize = errorFontSize
+    }
+    
+    var body: some View {
+        MTMathView(
+            mathList: mathList,
+            parseError: parseError,
+            fontSize: fontSize,
+            textColor: textColor,
+            font: font,
+            mode: mode,
+            textAlignment: textAlignment,
+            displayErrorInline: displayErrorInline,
+            errorFontSize: errorFontSize
+        )
+        .onAppear {
+            parseLatex()
+        }
+        .onChange(of: latex) { _ in
+            parseLatex()
+        }
+    }
+    
+    private func parseLatex() {
+        if !latex.isEmpty {
+            let result = parseMathList(latex)
+            mathList = result.0
+            parseError = result.1
+        } else {
+            mathList = nil
+            parseError = nil
+        }
+    }
+}
 
 func parseMathList(_ latex: String) -> (MTMathList?, MTParseError) {
     if !latex.isEmpty {
