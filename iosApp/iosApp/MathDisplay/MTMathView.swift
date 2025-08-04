@@ -112,11 +112,27 @@ struct MTMathView: View {
     }
 
     private func drawError(_ errorMessage: String, _ errorFontSize: Float, _ errorColor: Color, _ context: GraphicsContext, _ size: CGSize) {
-
+        let text = Text(errorMessage)
+            .font(.system(size: CGFloat(errorFontSize)))
+            .foregroundColor(errorColor)
+        
+        // Center the text in the available space
+        let textRect = CGRect(
+            x: 0,
+            y: (size.height - CGFloat(errorFontSize)) / 2,
+            width: size.width,
+            height: CGFloat(errorFontSize)
+        )
+        
+        context.draw(text, in: textRect)
     }
 
     private func drawMathFormula(_ displayList: MTMathListDisplay, _ textColor: Color, _ textAlignment: MTTextAlignment, _ context: GraphicsContext, _ size: CGSize) {
         var context = context
+        
+        // 设置文本颜色
+        displayList.textColor = textColor
+        
         // 根据对齐方式计算 X 位置
         let textX: Float = {
             switch textAlignment {
@@ -139,7 +155,6 @@ struct MTMathView: View {
         // 绘制（翻转 Y 轴以匹配数学坐标系）
         context.scaleBy(x: 1, y: -1)
         displayList.draw(canvas: context)
-        context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.red))
     }
 }
 
