@@ -60,17 +60,28 @@ struct MTMathView: View {
         // 状态管理
         let state: MTMathViewState = computeState()
 
-        Canvas { context, size in
-            let parseError = state.parseError
-            let displayList = state.displayList
+        ScrollView(.horizontal, showsIndicators: true) {
+            Canvas { context, size in
+                let parseError = state.parseError
+                let displayList = state.displayList
 
-            if let parseError = parseError, parseError.errorCode != .ErrorNone, displayErrorInline {
-                drawError(parseError.errorDesc, errorFontSize, .red, context, size)
-            } else if let displayList = displayList {
-                drawMathFormula(displayList, textColor, textAlignment, context, size)
+                if let parseError = parseError, parseError.errorCode != .ErrorNone, displayErrorInline {
+                    drawError(parseError.errorDesc, errorFontSize, .red, context, size)
+                } else if let displayList = displayList {
+                    drawMathFormula(displayList, textColor, textAlignment, context, size)
+                }
+                print(size)
+                print(UIScreen.main.bounds.width)
+            }
+            .frame(width: state.calculatedWidth, height: state.calculatedHeight)
+            .background {
+                LinearGradient(
+                            gradient: Gradient(colors: [Color.red, Color.blue]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
             }
         }
-        .frame(width: state.calculatedWidth, height: state.calculatedHeight)
     }
 
     private func computeState() -> MTMathViewState {
@@ -134,7 +145,8 @@ struct MTMathView: View {
         let textY = (Float(size.height) - eqHeight) / 2 + displayList.descent
 
         // 设置位置
-        displayList.position = MTCGPoint(x: textX, y: textY)
+        displayList.position.x = textX
+        displayList.position.y = textY
 
         // 绘制（翻转 Y 轴以匹配数学坐标系）
         context.scaleBy(x: 1, y: -1)
@@ -216,5 +228,5 @@ enum MTTextAlignment {
     case right
 }
 
-private let DefaultFontSize: Float = 20
-private let DefaultErrorFontSize: Float = 20
+private let DefaultFontSize: Float = 75
+private let DefaultErrorFontSize: Float = 75

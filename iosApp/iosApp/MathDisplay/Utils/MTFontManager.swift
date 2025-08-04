@@ -1,6 +1,6 @@
 import SwiftUI
 
-let kDefaultFontSize: Float = 20.0
+let kDefaultFontSize: Float = 75.0
 
 class MTFontManager {
     private static var nameToFontMap: [String: MTFont] = [:]

@@ -19,7 +19,7 @@ class Bitmap: Pointer {
     var pixelMode: Character {
         return FreeType.bitmapGetPixelMode1(pointer)
     }
-    var buffer: NativeBinaryBuffer {
+    var buffer: Data {
         return FreeType.bitmapGetBuffer1(pointer)
     }
 }

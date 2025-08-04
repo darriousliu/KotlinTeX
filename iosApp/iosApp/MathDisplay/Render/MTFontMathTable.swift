@@ -146,9 +146,7 @@ class MTFontMathTable {
                 }
 
                 unionBounds(u: &enclosing, b: nb)
-                if var boundingRects = boundingRects {
-                    boundingRects[i] = nb
-                }
+                boundingRects?[i] = nb
             }
         }
         return enclosing

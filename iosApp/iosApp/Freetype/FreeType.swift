@@ -397,10 +397,10 @@ class FreeType {
         return Character(UnicodeScalar(Int(bitmapGetPixelMode(bitmap)))!)
     }
 
-    class func bitmapGetBuffer1(_ bitmap: Int) -> NativeBinaryBuffer {
+    class func bitmapGetBuffer1(_ bitmap: Int) -> Data {
         let array = bitmapGetBuffer(bitmap)
         return array.ptr.withMemoryRebound(to: UInt8.self, capacity: Int(array.length)) { buffer in
-            NativeBinaryBuffer(data: Data(bytes: buffer, count: Int(array.length)))
+            Data(bytes: buffer, count: Int(array.length))
         }
     }
 

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C0823A702E3E4700002AF96F /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0823A6F2E3E4700002AF96F /* libfreetype.a */; };
+		C08251692E40B600002AF96F /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0824E1D2E3FA4A8002AF96F /* libfreetype.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1838,7 +1838,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0823A702E3E4700002AF96F /* libfreetype.a in Frameworks */,
+				C08251692E40B600002AF96F /* libfreetype.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6249,6 +6249,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = J669KBG846;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
@@ -6266,7 +6267,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../external/freetype/output";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../external/freetype/output/$(ARCHS)/iPhoneSimulator/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/../external/freetype/output/$(ARCHS)/iPhoneOS/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/../external/freetype/output/$(ARCHS)/iPhoneSimulator/lib";
 				OTHER_LDFLAGS = "-lfreetype";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "iosApp/iosApp-Bridging-Header.h";
@@ -6289,6 +6292,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = J669KBG846;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
@@ -6306,7 +6310,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../external/freetype/output";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../external/freetype/output/$(ARCHS)/iPhoneSimulator/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/../external/freetype/output/$(ARCHS)/iPhoneOS/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/../external/freetype/output/$(ARCHS)/iPhoneSimulator/lib";
 				OTHER_LDFLAGS = "-lfreetype";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "iosApp/iosApp-Bridging-Header.h";
