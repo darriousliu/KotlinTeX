@@ -2,6 +2,17 @@ import SwiftUI
 import Combine
 
 /**
+ * MTMathView Swift implementation - Fixed version
+ * 
+ * Key fixes applied to match Kotlin version behavior:
+ * 1. Removed incorrect screen density scaling in coordinate calculations
+ * 2. Fixed width/height calculation to match Kotlin logic exactly  
+ * 3. Implemented proper drawError function
+ * 4. Removed debug red fill that was masking rendering issues
+ * 5. Added MTMathViewLatex for LaTeX string input (like Kotlin version)
+ */
+
+/**
  * 共享数据类，用于管理 MTMathView 的状态
  */
 private struct MTMathViewState {
@@ -78,12 +89,8 @@ struct MTMathView: View {
             return MTMathViewState(displayList: nil, calculatedWidth: 0, calculatedHeight: 0, parseError: parseError)
         }
 
-        // Get screen scale for proper density handling
-        let screenScale = UIScreen.main.scale
-
-        // 1. 更新字体 - Apply screen scale to font size
-        let scaledFontSize = fontSize * Float(screenScale)
-        let newFont = (font ?? MTFontManager.defaultFont()).copyFontWithSize(size: scaledFontSize)
+        // 1. 更新字体 - No screen scale needed here, fontSize is already in correct units
+        let newFont = (font ?? MTFontManager.defaultFont()).copyFontWithSize(size: fontSize)
 
         // 2. 更新显示列表
         let newDisplayList: MTMathListDisplay? = {
@@ -91,12 +98,12 @@ struct MTMathView: View {
             return MTTypesetter.createLineForMathList(mathList: mathList, font: newFont, style: style)
         }()
 
-        // 3. 计算尺寸 - Apply proper scaling for screen density
+        // 3. 计算尺寸 - Match Kotlin logic exactly
         let (width, height): (CGFloat, CGFloat) = {
             if let newDisplayList = newDisplayList {
-                // Convert from points to screen pixels and back to points for proper sizing
-                let width = CGFloat(newDisplayList.width + 1) / screenScale
-                let height = CGFloat(newDisplayList.ascent + newDisplayList.descent + 1) / screenScale
+                // +1 for padding, just like in Kotlin version
+                let width = CGFloat(newDisplayList.width + 1)
+                let height = CGFloat(newDisplayList.ascent + newDisplayList.descent + 1)
                 return (width, height)
             } else if let parseError = parseError, parseError.errorCode != .ErrorNone, displayErrorInline {
                 let errorTextSize = CGFloat(errorFontSize)
@@ -132,30 +139,30 @@ struct MTMathView: View {
     private func drawMathFormula(_ displayList: MTMathListDisplay, _ textColor: Color, _ textAlignment: MTTextAlignment, _ context: GraphicsContext, _ size: CGSize) {
         var context = context
         
-        // Get screen scale for proper coordinate calculations
-        let screenScale = UIScreen.main.scale
+        // Set text color (convert SwiftUI Color to a format the display list can use)
+        // displayList.textColor = textColor // This might need adjustment based on how textColor is handled
         
-        // 根据对齐方式计算 X 位置
+        // 根据对齐方式计算 X 位置 - Match Kotlin logic exactly
         let textX: Float = {
             switch textAlignment {
             case .left: return 0
-            case .center: return Float((size.width - CGFloat(displayList.width) / screenScale) / 2)
-            case .right: return Float(size.width - CGFloat(displayList.width) / screenScale)
+            case .center: return Float((size.width - CGFloat(displayList.width)) / 2)
+            case .right: return Float(size.width - CGFloat(displayList.width))
             }
         }()
 
-        // 计算 Y 位置（垂直居中）
+        // 计算 Y 位置（垂直居中） - Match Kotlin logic exactly
         var eqHeight = displayList.ascent + displayList.descent
-        let scaledEqHeight = CGFloat(eqHeight) / screenScale
-        let adjustedEqHeight = max(scaledEqHeight, size.height / 2)
-        let textY = Float((size.height - adjustedEqHeight) / 2 + CGFloat(displayList.descent) / screenScale)
+        if eqHeight < Float(size.height) / 2 {
+            eqHeight = Float(size.height) / 2
+        }
+        let textY = (Float(size.height) - eqHeight) / 2 + displayList.descent
 
         // 设置位置
         displayList.position = MTCGPoint(x: textX, y: textY)
 
         // 绘制（翻转 Y 轴以匹配数学坐标系）
         context.scaleBy(x: 1, y: -1)
-        context.translateBy(x: 0, y: -size.height)
         displayList.draw(canvas: context)
         
         // Debug red fill removed - was masking the actual rendering
