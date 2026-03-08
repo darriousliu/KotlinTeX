@@ -149,6 +149,9 @@ f(x) = \begin{cases} \frac{e^x}{2} & x \geq 0 \\ 1 & x < 0 \end{cases}
 # Exponents and subscripts
 \frac{x^{2+3y}}{x^{2+4y}} = x^y \times \frac{z_1^{y+1}}{z_1^{y+1}}
 
+# Prime notation (f' = f^{\prime})
+f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
+
 # Square root
 5+\sqrt{2}+3
 
