@@ -216,6 +216,28 @@ class MTMathListBuilder(str: String) {
                     }
                 }
 
+                '\'' -> {
+                    // ' is a shorthand for \prime in superscript position, e.g. f' = f^{\prime}
+                    val primeAtom = MTMathAtom.atomForLatexSymbol("prime")
+                        ?: throw MathDisplayException("prime atom not found")
+                    primeAtom.fontStyle = currentFontStyle
+                    if (oneCharOnly) {
+                        // Inside a single-char context (e.g. x^'), add prime as a regular atom
+                        list.addAtom(primeAtom)
+                        return list
+                    }
+                    if (prevAtom == null || !prevAtom.scriptsAllowed()) {
+                        // No previous atom or scripts not allowed; add an empty node
+                        prevAtom = MTMathAtom(MTMathAtomType.KMTMathAtomOrdinary, "")
+                        list.addAtom(prevAtom)
+                    }
+                    // Append \prime to the superscript list (supports f'' = f^{\prime\prime})
+                    val superScript = prevAtom.superScript ?: MTMathList()
+                    superScript.addAtom(primeAtom)
+                    prevAtom.superScript = superScript
+                    continue@outerLoop
+                }
+
                 else -> {
                     if (spacesAllowed && ch == ' ') {
                         // If spaces are allowed then spaces do not need escaping with a \ before being used.
