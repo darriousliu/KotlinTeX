@@ -207,8 +207,7 @@ fun LatexScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(it)
-                .fillMaxSize()
-                .horizontalScroll(rememberScrollState()),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(40.dp),
         ) {
             when (latexType) {
@@ -219,6 +218,7 @@ fun LatexScreen(
                     ) { _, item ->
                         MTMathView(
                             mathItem = item,
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
                             textColor = color,
                         )
                     }
@@ -231,6 +231,7 @@ fun LatexScreen(
                     ) { _, math ->
                         MTMathView(
                             mathList = math,
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
                             fontSize = fontSize,
                             font = mtFont,
                             mode = mode,
@@ -246,6 +247,7 @@ fun LatexScreen(
                     ) { _, item ->
                         MTMathView(
                             latex = item,
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
                             fontSize = fontSize,
                             font = mtFont,
                             mode = mode,
@@ -253,8 +255,6 @@ fun LatexScreen(
                         )
                     }
                 }
-
-                else -> {}
             }
         }
     }
