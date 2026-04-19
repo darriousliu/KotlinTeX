@@ -1,5 +1,7 @@
 # KotlinTeX
 
+# 当前项目不再维护，建议参考基于[RaTeX](https://github.com/erweixin/RaTeX)的新项目[RaTeX-CMP](https://github.com/darriousliu/RaTeX-CMP)
+
 [English Version](README-en.md) | [中文版本](README.md)
 
 [![许可证](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
